@@ -63,32 +63,49 @@ function executeServerControlAction($action, $arguments = null) {
     $arguments = ' ' . join(' ', $arguments);
   }
   if (!key_exists($action, SERVER_ACTION_COMMANDS)) {
-    bm_error("Invalid server action $action");
+    error_log("Warning: Invalid server action $action");
+    return false;
   }
   $output = null;
   $result_code = null;
   exec(ENVVAR_ASSIGNMENT . SERVER_ACTION_COMMANDS[$action] . $arguments, $output, $result_code);
   if ($result_code != 0) {
-    bm_error("Initiation of server action command $action failed with error code $result_code:\n" . join("\n", $output));
+    error_log("Warning: Initiation of server action command $action failed with error code $result_code");
+    return false;
   }
+  return true;
 }
 
 function executeServerControlActionWithResult($action, $arguments = null, $return_result_code = false) {
   $output = null;
   $result_code = null;
   exec('rm -f ' . SERVER_ACTION_RESULT_FILE, $output, $result_code);
-  if ($result_code != 0) {
-    bm_error("Deletion of action result file failed with error code $result_code:\n" . join("\n", $output));
+  // Continue anyway - file might not exist
+  
+  $execResult = executeServerControlAction($action, $arguments);
+  if ($execResult === false) {
+    error_log("Warning: Failed to execute server action $action");
+    return array();
   }
-  executeServerControlAction($action, $arguments);
-  waitForFileToExist(SERVER_ACTION_RESULT_FILE, NETWORK_QUERY_INTERVAL, NETWORK_SWITCH_TIMEOUT);
-  $result = file(SERVER_ACTION_RESULT_FILE, FILE_IGNORE_NEW_LINES);
+  
+  $waitResult = waitForFileToExist(SERVER_ACTION_RESULT_FILE, NETWORK_QUERY_INTERVAL, NETWORK_SWITCH_TIMEOUT);
+  if ($waitResult === ACTION_TIMED_OUT) {
+    error_log("Warning: Action result file did not appear for action $action");
+    return array();
+  }
+  
+  $result = @file(SERVER_ACTION_RESULT_FILE, FILE_IGNORE_NEW_LINES);
+  if ($result === false) {
+    error_log("Warning: Could not read action result file for action $action");
+    return array();
+  }
   $result_code = $result[0];
   $output = (count($result) > 1) ? array_slice($result, 1) : array();
   if ($return_result_code) {
     return array('result_code' => $result_code, 'output' => $output);
   } elseif ($result_code != 0) {
-    bm_error("Server action command $action failed with error code $result_code:\n" . join("\n", $output));
+    error_log("Warning: Server action command $action failed with error code $result_code");
+    return array();
   }
   return $output;
 }
@@ -190,9 +207,9 @@ function obtainWirelessScanResults() {
 
   $data = json_decode($jsonString, true);
 
-  // Error handling for the JSON parser
+  // Error handling for the JSON parser - return empty array instead of exiting
   if (json_last_error() !== JSON_ERROR_NONE) {
-    bm_error("JSON Decoding Error: " . json_last_error_msg());
+    error_log("Warning: JSON Decoding Error in wireless scan: " . json_last_error_msg());
     return array();
   }
 
@@ -206,7 +223,8 @@ function obtainConnectedNetworkSSID() {
   if ($result_code == 255) {
     $ssid = null;
   } elseif ($result_code != 0) {
-    bm_error("Obtaining connected network SSID failed with error code $result_code:\n" . join("\n", $output));
+    error_log("Warning: Obtaining connected network SSID failed with error code $result_code");
+    $ssid = null;
   } else {
     $ssid = $output[0];
   }

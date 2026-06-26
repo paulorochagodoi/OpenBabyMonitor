@@ -12,6 +12,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
   exit;
 }
 
-createEventsTableIfMissing($_DATABASE);
-clearEvents($_DATABASE);
-echo json_encode(['success' => true]);
+try {
+  createEventsTableIfMissing($_DATABASE);
+  clearEvents($_DATABASE);
+  echo json_encode(['success' => true]);
+} catch (Exception $e) {
+  error_log("Error clearing events: " . $e->getMessage());
+  echo json_encode(['error' => 'Failed to clear events']);
+}
