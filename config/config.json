@@ -618,6 +618,51 @@
         "audio": "g_audio",
         "info": "g_info"
     },
+    "whitenoise_settings": {
+        "enabled": {
+            "group": "control",
+            "name": "enabled",
+            "type": "BOOLEAN NOT NULL",
+            "initial_value": false
+        },
+        "sound_type": {
+            "group": "sound",
+            "name": "sound_type",
+            "type": "VARCHAR(8) NOT NULL",
+            "initial_value": "pink",
+            "values": {
+                "noise_white": "white",
+                "noise_pink": "pink",
+                "noise_brown": "brown"
+            }
+        },
+        "volume": {
+            "group": "sound",
+            "name": "volume",
+            "type": "INT UNSIGNED NOT NULL",
+            "initial_value": 50,
+            "range": {
+                "min": 0,
+                "max": 100,
+                "step": 1
+            }
+        },
+        "timer_minutes": {
+            "group": "control",
+            "name": "timer_minutes",
+            "type": "INT UNSIGNED NOT NULL",
+            "initial_value": 0,
+            "range": {
+                "min": 0,
+                "max": 120,
+                "step": 5
+            }
+        }
+    },
+    "whitenoise_groups": {
+        "control": "g_control",
+        "sound": "g_sound"
+    },
     "system_settings": {
         "ask_secure_redirect": {
             "group": "browser_notifications",

@@ -56,5 +56,7 @@
     "sure_want_to_reset": "Are you sure you want to reset the settings to their default values?",
     "will_reboot": "The device will reboot automatically.",
     "must_reboot_for_changes": "The change will not take effect until the device is rebooted.",
-    "nav_timeline": "History"
+    "nav_timeline": "History",
+    "nav_white_noise": "White noise",
+    "nav_night_light": "Night light"
 }

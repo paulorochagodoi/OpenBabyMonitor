@@ -1,0 +1,13 @@
+{
+    "whitenoise_settings": "White noise settings",
+    "submit": "Confirm",
+    "enabled": "Enabled",
+    "sound_type": "Sound type",
+    "noise_white": "White noise",
+    "noise_pink": "Pink noise",
+    "noise_brown": "Brown noise",
+    "volume": "Volume (%)",
+    "timer_minutes": "Auto-off timer (min, 0 = off)",
+    "g_control": "Control",
+    "g_sound": "Sound"
+}

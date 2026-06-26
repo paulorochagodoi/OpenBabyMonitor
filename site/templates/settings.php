@@ -29,6 +29,8 @@ function generateInputs($setting_type, $grouped_setting_values, $pre_group_html,
         }
       } elseif (array_key_exists('radiovalues', $setting)) {
         generateRadio($setting, $setting_name, $initial_value);
+      } elseif (array_key_exists('input_type', $setting) && $setting['input_type'] == 'color') {
+        generateColor($setting, $setting_name, $initial_value);
       } elseif (array_key_exists('range', $setting)) {
         generateRange($setting, $setting_name, $initial_value);
       } else {
@@ -136,6 +138,21 @@ function generateRange($setting, $setting_name, $initial_value) {
   line('    </div>');
   line('    <div class="col-auto px-0" style="min-width: ' . $n_output_chars . 'rem;">');
   line("      <output id=\"$value_id\">$initial_value</output>");
+  line('    </div>');
+  line('  </div>');
+  line('</div>');
+}
+
+function generateColor($setting, $setting_name, $initial_value) {
+  $id = $setting_name;
+  $name = $setting['name'];
+  $name_trans = LANG[$name];
+
+  line('<div class="mb-3">');
+  line("  <label class=\"form-label\" for=\"$id\">$name_trans</label>");
+  line('  <div class="row">');
+  line('    <div class="col-auto">');
+  line("      <input type=\"color\" name=\"$setting_name\" class=\"form-control form-control-color\" value=\"$initial_value\" id=\"$id\">");
   line('    </div>');
   line('  </div>');
   line('</div>');

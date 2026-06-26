@@ -56,5 +56,7 @@
     "sure_want_to_reset": "Er du sikker på at du vil tilbakestille innstillingene til deres standardverdier?",
     "will_reboot": "Enheten vil restarte automatisk.",
     "must_reboot_for_changes": "Endringen vil ikke tre i kraft før enheten restartes.",
-    "nav_timeline": "Logg"
+    "nav_timeline": "Logg",
+    "nav_white_noise": "Hvit støy",
+    "nav_night_light": "Nattlys"
 }

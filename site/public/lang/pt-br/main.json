@@ -35,5 +35,7 @@
     "connection_lost_ap_text": "Por favor, certifique-se de que o dispositivo está ligado e que você ainda está conectado ao seu ponto de acesso.",
     "connection_lost_client_text": "Por favor, certifique-se de que o dispositivo está ligado e com cobertura WiFi e que você está conectado à mesma rede.",
     "play_audio": "Reproduzir áudio",
-    "prevent_sleep": "Manter tela ativa"
+    "prevent_sleep": "Manter tela ativa",
+    "white_noise": "Ruído branco",
+    "night_light": "Abajur"
 }

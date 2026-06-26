@@ -7,6 +7,8 @@ $mode = readCurrentMode($_DATABASE);
 
 define('INFERENCE_MODEL', readValuesFromTable($_DATABASE, 'listen_settings', 'model', true));
 
+define('WHITENOISE_ENABLED', readValuesFromTable($_DATABASE, 'whitenoise_settings', 'enabled', true));
+
 define('HIDDEN_STYLE', 'style="display: none;"');
 
 require_once(TEMPLATES_DIR . '/main.php');
@@ -315,7 +317,7 @@ require_once(TEMPLATES_DIR . '/main.php');
       </div>
     </main>
 
-    <footer class="d-flex flex-grow-0 flex-shrink-1 justify-content-center">
+    <footer class="d-flex flex-column flex-grow-0 flex-shrink-1 justify-content-center align-items-center">
       <div id="footer_container" class="btn-group" data-toggle="buttons" style="display: none;">
         <?php
         createModeRadioButton($mode, 'standby', LANG['standby'], 'moon');
@@ -325,6 +327,17 @@ require_once(TEMPLATES_DIR . '/main.php');
           createModeRadioButton($mode, 'videostream', LANG['observe'], 'camera-video');
         }
         ?>
+      </div>
+      <div id="features_container" class="d-flex align-items-center justify-content-center flex-wrap mt-2" style="display: none;">
+        <div class="d-flex align-items-center text-bm mx-2 my-1" role="button" onclick="$('#whitenoise_feature_switch').click();">
+          <svg class="bi me-1" style="height: 1.1em; width: 1.1em;" fill="currentColor">
+            <use href="media/bootstrap-icons.svg#water" />
+          </svg>
+          <?php echo LANG['white_noise']; ?>
+          <div class="form-check form-switch my-0 ms-2 pe-0">
+            <input id="whitenoise_feature_switch" class="form-check-input" type="checkbox" role="button" <?php echo WHITENOISE_ENABLED ? 'checked' : ''; ?>>
+          </div>
+        </div>
       </div>
     </footer>
   </div>
@@ -379,6 +392,7 @@ require_once(TEMPLATES_DIR . '/main.php');
   <?php } ?>
   <script src="js/main.js"></script>
   <script src="js/network.js"></script>
+  <script src="js/features.js"></script>
 
   <div style="position: relative; top: 100%; left: 0; width: 100%; height: 10vh; overflow: hidden;"></div>
 </body>
