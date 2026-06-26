@@ -11,7 +11,7 @@ function createEventsTableIfMissing($database) {
     );"
   );
   if (!$result) {
-    bm_error("Could not create events table: " . $database->error);
+    throw new Exception("Could not create events table: " . $database->error);
   }
 }
 
@@ -34,13 +34,13 @@ function queryEvents($database, $type_filter = 'all', $limit = 200) {
     "SELECT `id`, `type`, `recorded_at` FROM `events` $where ORDER BY `recorded_at` DESC LIMIT $limit"
   );
   if (!$result) {
-    bm_error("Could not query events: " . $database->error);
+    throw new Exception("Could not query events: " . $database->error);
   }
   return $result->fetch_all(MYSQLI_ASSOC);
 }
 
 function clearEvents($database) {
   if (!$database->query("DELETE FROM `events`")) {
-    bm_error("Could not clear events: " . $database->error);
+    throw new Exception("Could not clear events: " . $database->error);
   }
 }
