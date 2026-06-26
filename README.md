@@ -16,6 +16,8 @@ The purpose of this project is to make use of the great flexibility and availabi
 * Can either be connected to the home Wi-Fi or provide its own wireless access point.
 * Detects baby crying using either a simple loudness threshold or a neural network trained on Google's [AudioSet](https://research.google.com/audioset/) dataset to distinguish between crying, babbling and ambient sounds.
 * Live audio streaming and optionally video streaming in up to 1080p resolution.
+* Event history timeline that automatically logs every detection (crying, babbling and significant sounds), with filtering by type, grouping by day and an option to clear the history.
+* Multi-language interface, currently available in English, Norwegian and Brazilian Portuguese.
 * Low power consumption (see [Power consumption](#powe dr-consumption)), enabling tens of hours of battery life when powered by even a modestly sized portable power bank.
 
 ## Equipment
@@ -204,6 +206,52 @@ After the Pi has rebooted you will be able to SSH in using the new hostname (def
 ```
 ssh pi@<hostname>
 ```
+
+## Updating
+
+You can update an existing baby monitor to a newer version of the software **without losing any of your data** (settings, saved networks, passwords and event history are all preserved). The update is delivered as a ZIP package containing an `update.sh` script that copies the new files into your installation, applies any necessary database migrations and restarts the web server. No `git` is required.
+
+> **_Note:_** The update preserves your customized `config/config.json` (it is patched in place rather than overwritten) and creates a timestamped backup of every replaced file under `OpenBabyMonitor/.update_backup_<date>/` so you can roll back if needed.
+
+### Updating with internet access
+
+If the Pi is connected to your local Wi-Fi (and thus has internet access), SSH into it and run:
+
+```bash
+cd ~
+# Download the repository as a ZIP and extract it
+wget -O bm-update.zip https://github.com/paulorochagodoi/OpenBabyMonitor/archive/refs/heads/main.zip
+unzip -o bm-update.zip
+# Enter the extracted folder (the name matches the downloaded branch) and run the updater
+cd OpenBabyMonitor-main
+./update.sh
+```
+
+The script automatically detects the installation in `~/OpenBabyMonitor`. If your installation is somewhere else, point to it explicitly:
+
+```bash
+./update.sh --target /path/to/OpenBabyMonitor
+```
+
+To preview the changes without modifying anything, run `./update.sh --dry-run`. Run `./update.sh --help` for all options.
+
+### Updating without internet access (access point mode)
+
+If the Pi only provides its own access point and has no internet access, download the ZIP on your computer instead, transfer it to the Pi and then run the updater:
+
+```bash
+# On your computer (replace the IP with the Pi's address, e.g. 192.168.4.1 in access point mode)
+wget -O bm-update.zip https://github.com/paulorochagodoi/OpenBabyMonitor/archive/refs/heads/main.zip
+scp bm-update.zip pi@<pi-ip>:~/
+
+# Then, over SSH on the Pi:
+cd ~
+unzip -o bm-update.zip
+cd OpenBabyMonitor-main
+./update.sh
+```
+
+After the update finishes, the new **Brazilian Portuguese** translation is available from the language menu and the new **event history** screen can be opened from the navigation bar.
 
 ## Troubleshooting
 
