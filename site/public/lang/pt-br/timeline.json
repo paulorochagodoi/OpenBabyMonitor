@@ -1,0 +1,20 @@
+{
+    "timeline": "Histórico de eventos",
+    "timeline_empty": "Nenhum evento registrado ainda.",
+    "timeline_clear": "Limpar histórico",
+    "sure_want_to_clear": "Tem certeza que deseja limpar o histórico de eventos?",
+    "filter_all": "Todos",
+    "filter_sound": "Som",
+    "filter_crying": "Choro",
+    "filter_babbling": "Balbucio",
+    "filter_mixed": "Misto",
+    "event_sound": "Som significativo",
+    "event_crying": "Choro detectado",
+    "event_babbling": "Balbucio detectado",
+    "event_crying_and_babbling": "Choro e balbucio",
+    "event_crying_or_babbling": "Choro ou balbucio",
+    "today": "Hoje",
+    "yesterday": "Ontem",
+    "auto_refresh": "Atualização automática",
+    "nav_timeline": "Histórico"
+}

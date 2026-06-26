@@ -9,6 +9,16 @@ require_once(SRC_DIR . '/language.php');
 
 define('VALID_LANGUAGES', $_CONFIG['language']['current']['values']);
 
+// Migrate language column to CHAR(5) if it is still CHAR(2) (needed for 'pt-br').
+$_lang_col = $_DATABASE->query("SHOW COLUMNS FROM `language` WHERE Field = 'current'");
+if ($_lang_col) {
+  $_lang_col_row = $_lang_col->fetch_assoc();
+  if ($_lang_col_row && strtolower($_lang_col_row['Type']) === 'char(2)') {
+    $_DATABASE->query("ALTER TABLE `language` MODIFY COLUMN `current` CHAR(5) NOT NULL");
+  }
+  unset($_lang_col, $_lang_col_row);
+}
+
 if (isset($_GET['lang'])) {
   $new_language = $_GET['lang'];
   if (!in_array($new_language, VALID_LANGUAGES)) {

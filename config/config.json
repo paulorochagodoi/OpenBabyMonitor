@@ -18,11 +18,12 @@
     },
     "language": {
         "current": {
-            "type": "CHAR(2) NOT NULL",
+            "type": "CHAR(5) NOT NULL",
             "initial_value": "en",
             "values": [
                 "en",
-                "no"
+                "no",
+                "pt-br"
             ]
         }
     },

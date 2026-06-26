@@ -1,0 +1,20 @@
+{
+    "timeline": "Hendelseslogg",
+    "timeline_empty": "Ingen hendelser registrert ennå.",
+    "timeline_clear": "Tøm logg",
+    "sure_want_to_clear": "Er du sikker på at du vil tømme hendelsesloggen?",
+    "filter_all": "Alle",
+    "filter_sound": "Lyd",
+    "filter_crying": "Gråt",
+    "filter_babbling": "Babling",
+    "filter_mixed": "Blandet",
+    "event_sound": "Betydelig lyd",
+    "event_crying": "Gråt oppdaget",
+    "event_babbling": "Babling oppdaget",
+    "event_crying_and_babbling": "Gråt og babling",
+    "event_crying_or_babbling": "Gråt eller babling",
+    "today": "I dag",
+    "yesterday": "I går",
+    "auto_refresh": "Automatisk oppdatering",
+    "nav_timeline": "Logg"
+}
