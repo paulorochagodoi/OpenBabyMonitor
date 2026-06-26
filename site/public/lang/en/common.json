@@ -55,5 +55,6 @@
     "overheat_warning_text": "The unit is becoming too hot. The CPU has been slowed down to limit further heating.<br><br>Please ensure that the unit has proper ventilation, and limit the use of video or audio streaming.",
     "sure_want_to_reset": "Are you sure you want to reset the settings to their default values?",
     "will_reboot": "The device will reboot automatically.",
-    "must_reboot_for_changes": "The change will not take effect until the device is rebooted."
+    "must_reboot_for_changes": "The change will not take effect until the device is rebooted.",
+    "nav_timeline": "History"
 }

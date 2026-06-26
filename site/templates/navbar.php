@@ -125,6 +125,14 @@ define('ANY_KNOWN_NETWORKS', anyKnownNetworks($_DATABASE));
               </a></li>
           </ul>
         </li>
+        <li class="nav-item">
+          <a id="timeline_nav_link" class="nav-link<?php echo LOCATION == 'timeline' ? ' active' : ''; ?> d-flex align-items-center disabled" href="timeline.php">
+            <svg class="bi me-2" style="height: 1.1em; width: 1.1em;" fill="currentColor">
+              <use href="media/bootstrap-icons.svg#clock-history" />
+            </svg>
+            <?php echo LANG['nav_timeline']; ?>
+          </a>
+        </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle d-flex align-items-center disabled" href="#" data-bs-toggle="dropdown">
             <svg class="bi me-2" style="height: 1.1em; width: 1.1em;" fill="currentColor">
@@ -143,6 +151,12 @@ define('ANY_KNOWN_NETWORKS', anyKnownNetworks($_DATABASE));
               <a id="language_no_nav_link" class="dropdown-item<?php echo LANGUAGE == 'no' ? ' active"' : '" href="' . URL_WITHOUT_SEARCH . '?lang=no"'; ?>">
                 <span class="me-2 fi fi-no" style="height: 1.1em; width: 1.1em;"></span>
                 Norsk
+              </a>
+            </li>
+            <li>
+              <a id="language_pt_br_nav_link" class="dropdown-item<?php echo LANGUAGE == 'pt-br' ? ' active"' : '" href="' . URL_WITHOUT_SEARCH . '?lang=pt-br"'; ?>">
+                <span class="me-2 fi fi-br" style="height: 1.1em; width: 1.1em;"></span>
+                Português (BR)
               </a>
             </li>
           </ul>

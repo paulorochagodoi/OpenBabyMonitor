@@ -4,6 +4,10 @@ require_once(dirname(__DIR__) . '/config/env_config.php');
 require_once(dirname(__DIR__) . '/config/error_config.php');
 require_once(SRC_DIR . '/settings.php');
 require_once(SRC_DIR . '/sse.php');
+require_once(dirname(__DIR__) . '/config/database_config.php');
+require_once(SRC_DIR . '/events.php');
+
+createEventsTableIfMissing($_DATABASE);
 
 sendSSEHeaders();
 
@@ -51,7 +55,9 @@ while (!connection_aborted()) { // Checking connection_aborted() is really only 
       $probabilities = file_get_contents($probabilities_file);
       sendSSEMessage('probabilities', $probabilities);
     } elseif ($event['wd'] == $notification_descriptor) {
-      sendSSEMessage('notification', file_get_contents($notification_file));
+      $notification_type = trim(file_get_contents($notification_file));
+      sendSSEMessage('notification', $notification_type);
+      insertEvent($_DATABASE, $notification_type);
     }
   }
 }

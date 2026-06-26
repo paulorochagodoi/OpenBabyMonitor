@@ -1,0 +1,20 @@
+{
+    "timeline": "Event history",
+    "timeline_empty": "No events recorded yet.",
+    "timeline_clear": "Clear history",
+    "sure_want_to_clear": "Are you sure you want to clear the event history?",
+    "filter_all": "All",
+    "filter_sound": "Sound",
+    "filter_crying": "Crying",
+    "filter_babbling": "Babbling",
+    "filter_mixed": "Mixed",
+    "event_sound": "Significant sound",
+    "event_crying": "Crying detected",
+    "event_babbling": "Babbling detected",
+    "event_crying_and_babbling": "Crying and babbling",
+    "event_crying_or_babbling": "Crying or babbling",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "auto_refresh": "Auto-refresh",
+    "nav_timeline": "History"
+}
