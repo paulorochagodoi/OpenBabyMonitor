@@ -13,6 +13,7 @@ if (!defined('FEATURE_ACTION_OK')) {
 // are added here as features are implemented.
 define('FEATURE_SERVICES', array(
   'whitenoise' => 'bm_whitenoise',
+  'nightlight' => 'bm_nightlight',
 ));
 
 function featureServiceName($feature) {

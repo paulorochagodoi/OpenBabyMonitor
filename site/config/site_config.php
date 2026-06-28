@@ -18,6 +18,7 @@ require_once(SRC_DIR . '/migration.php');
 
 // Ensure settings tables for features added after initial setup exist on upgrade.
 ensureSettingsTableInitialized($_DATABASE, 'whitenoise_settings');
+ensureSettingsTableInitialized($_DATABASE, 'nightlight_settings');
 
 switch (basename($_SERVER['SCRIPT_NAME'])) {
   case 'main.php':

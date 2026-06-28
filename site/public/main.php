@@ -8,6 +8,7 @@ $mode = readCurrentMode($_DATABASE);
 define('INFERENCE_MODEL', readValuesFromTable($_DATABASE, 'listen_settings', 'model', true));
 
 define('WHITENOISE_ENABLED', readValuesFromTable($_DATABASE, 'whitenoise_settings', 'enabled', true));
+define('NIGHTLIGHT_ENABLED', readValuesFromTable($_DATABASE, 'nightlight_settings', 'enabled', true));
 
 define('HIDDEN_STYLE', 'style="display: none;"');
 
@@ -336,6 +337,15 @@ require_once(TEMPLATES_DIR . '/main.php');
           <?php echo LANG['white_noise']; ?>
           <div class="form-check form-switch my-0 ms-2 pe-0">
             <input id="whitenoise_feature_switch" class="form-check-input" type="checkbox" role="button" <?php echo WHITENOISE_ENABLED ? 'checked' : ''; ?>>
+          </div>
+        </div>
+        <div class="d-flex align-items-center text-bm mx-2 my-1" role="button" onclick="$('#nightlight_feature_switch').click();">
+          <svg class="bi me-1" style="height: 1.1em; width: 1.1em;" fill="currentColor">
+            <use href="media/bootstrap-icons.svg#lightbulb-fill" />
+          </svg>
+          <?php echo LANG['night_light']; ?>
+          <div class="form-check form-switch my-0 ms-2 pe-0">
+            <input id="nightlight_feature_switch" class="form-check-input" type="checkbox" role="button" <?php echo NIGHTLIGHT_ENABLED ? 'checked' : ''; ?>>
           </div>
         </div>
       </div>

@@ -49,6 +49,12 @@ define('ANY_KNOWN_NETWORKS', anyKnownNetworks($_DATABASE));
                 </svg>
                 <?php echo LANG['nav_white_noise']; ?>
               </a></li>
+            <li><a id="nightlight_settings_nav_link" class="dropdown-item<?php echo LOCATION == 'nightlight_settings' ? ' active' : ''; ?> d-flex align-items-center" href="nightlight_settings.php">
+                <svg class="bi me-2" style="height: 1.1em; width: 1.1em;" fill="currentColor">
+                  <use href="media/bootstrap-icons.svg#lightbulb-fill" />
+                </svg>
+                <?php echo LANG['nav_night_light']; ?>
+              </a></li>
             <?php if (USES_CAMERA) { ?>
               <li><a id="videostream_settings_nav_link" class="dropdown-item<?php echo LOCATION == 'videostream_settings' ? ' active' : ''; ?> d-flex align-items-center" href="videostream_settings.php">
                   <svg class="bi me-2" style="height: 1.1em; width: 1.1em;" fill="currentColor">

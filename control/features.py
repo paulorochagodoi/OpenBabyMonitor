@@ -8,6 +8,7 @@ import control
 # site/src/feature.php.
 FEATURE_SERVICES = {
     'whitenoise': 'bm_whitenoise',
+    'nightlight': 'bm_nightlight',
 }
 
 
