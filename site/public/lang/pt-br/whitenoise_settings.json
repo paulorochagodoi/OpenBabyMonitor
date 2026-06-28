@@ -1,0 +1,13 @@
+{
+    "whitenoise_settings": "Configurações de ruído branco",
+    "submit": "Confirmar",
+    "enabled": "Ativado",
+    "sound_type": "Tipo de som",
+    "noise_white": "Ruído branco",
+    "noise_pink": "Ruído rosa",
+    "noise_brown": "Ruído marrom",
+    "volume": "Volume (%)",
+    "timer_minutes": "Timer de desligamento (min, 0 = desligado)",
+    "g_control": "Controle",
+    "g_sound": "Som"
+}

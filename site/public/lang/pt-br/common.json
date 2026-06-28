@@ -56,5 +56,7 @@
     "sure_want_to_reset": "Tem certeza que deseja redefinir as configurações para os valores padrão?",
     "will_reboot": "O dispositivo será reiniciado automaticamente.",
     "must_reboot_for_changes": "A alteração não terá efeito até que o dispositivo seja reiniciado.",
-    "nav_timeline": "Histórico"
+    "nav_timeline": "Histórico",
+    "nav_white_noise": "Ruído branco",
+    "nav_night_light": "Abajur"
 }

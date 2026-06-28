@@ -33,3 +33,12 @@ echo -e "LC_ALL=\"$BM_LOCALE\"\nLANGUAGE=\"$BM_LOCALE\"" >> /etc/default/locale
 do_change_timezone $BM_TIMEZONE
 
 do_camera 0
+
+# Enable SPI for the night light (WS2812/NeoPixel ring driven over SPI on GPIO10).
+do_spi 0
+
+# Allow the babymonitor user to access the SPI device without root, so the night
+# light service can drive the LEDs while running as $BM_USER.
+if getent group spi > /dev/null; then
+    usermod -aG spi $BM_USER
+fi

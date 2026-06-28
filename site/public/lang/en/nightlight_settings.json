@@ -1,0 +1,12 @@
+{
+    "nightlight_settings": "Night light settings",
+    "submit": "Confirm",
+    "enabled": "Enabled",
+    "color": "Color",
+    "brightness": "Brightness (%)",
+    "effect": "Effect",
+    "effect_solid": "Solid",
+    "effect_breathe": "Breathe",
+    "g_control": "Control",
+    "g_appearance": "Appearance"
+}

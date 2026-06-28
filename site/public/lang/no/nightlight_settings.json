@@ -1,0 +1,12 @@
+{
+    "nightlight_settings": "Innstillinger for nattlys",
+    "submit": "Bekreft",
+    "enabled": "Aktivert",
+    "color": "Farge",
+    "brightness": "Lysstyrke (%)",
+    "effect": "Effekt",
+    "effect_solid": "Fast",
+    "effect_breathe": "Pust",
+    "g_control": "Kontroll",
+    "g_appearance": "Utseende"
+}

@@ -425,7 +425,7 @@ WantedBy=multi-user.target" > $LINKED_UNIT_DIR/$STARTUP_SERVICE_FILENAME
 
     CMD_ALIAS="Cmnd_Alias BM_MODES = $VCGENCMD get_throttled, $VCGENCMD measure_temp,"
 
-    for SERVICE in standby listen audiostream videostream
+    for SERVICE in standby listen audiostream videostream whitenoise nightlight
     do
         SERVICE_ROOT_NAME=bm_$SERVICE
         SERVICE_FILENAME=$SERVICE_ROOT_NAME.service

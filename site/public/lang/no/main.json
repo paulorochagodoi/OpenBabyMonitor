@@ -35,5 +35,7 @@
     "connection_lost_ap_text": "Vennligst sjekk at enheten har strøm og at du fortsatt er tilkoblet tilgangspunktet.",
     "connection_lost_client_text": "Vennligst sjekk at enheten har strøm og WiFi-dekning og at dere er koblet til det samme nettverket.",
     "play_audio": "Begynn lydavspilling",
-    "prevent_sleep": "Hold skjermen på"
+    "prevent_sleep": "Hold skjermen på",
+    "white_noise": "Hvit støy",
+    "night_light": "Nattlys"
 }

@@ -1,0 +1,13 @@
+{
+    "whitenoise_settings": "Innstillinger for hvit støy",
+    "submit": "Bekreft",
+    "enabled": "Aktivert",
+    "sound_type": "Lydtype",
+    "noise_white": "Hvit støy",
+    "noise_pink": "Rosa støy",
+    "noise_brown": "Brun støy",
+    "volume": "Volum (%)",
+    "timer_minutes": "Tidsur for autoavslag (min, 0 = av)",
+    "g_control": "Kontroll",
+    "g_sound": "Lyd"
+}
