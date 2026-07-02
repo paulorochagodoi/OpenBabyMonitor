@@ -46,6 +46,9 @@ switch (basename($_SERVER['SCRIPT_NAME'])) {
   case 'timeline.php':
     define('LOCATION', 'timeline');
     break;
+  case 'recordings.php':
+    define('LOCATION', 'recordings');
+    break;
   default:
     define('LOCATION', 'login');
     break;

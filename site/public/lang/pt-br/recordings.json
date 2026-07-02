@@ -1,0 +1,14 @@
+{
+    "recordings": "Gravações",
+    "recordings_empty": "Nenhuma gravação ainda. As gravações são feitas enquanto o monitor está no modo de notificação.",
+    "recordings_clear": "Excluir todas",
+    "sure_want_to_clear_recordings": "Tem certeza que deseja excluir todas as gravações?",
+    "sure_want_to_delete_recording": "Tem certeza que deseja excluir esta gravação?",
+    "cry_markers": "{} momento(s) de choro",
+    "no_cry_markers": "Nenhum choro detectado",
+    "total_storage": "Armazenamento usado",
+    "today": "Hoje",
+    "yesterday": "Ontem",
+    "auto_refresh": "Atualização automática",
+    "nav_recordings": "Gravações"
+}

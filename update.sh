@@ -57,19 +57,34 @@ $DRY_RUN && warn "Modo simulação (--dry-run): nenhum arquivo será alterado."
 # ── Lista de arquivos que esta atualização instala ─────────────────────────────
 # (config/config.json NÃO entra aqui — é atualizado por patch, mais abaixo.)
 FILES=(
+    "control/listen.py"
+    "control/recording.py"
+    "detection/features.py"
     "site/config/language_config.php"
+    "site/config/path_config.php"
     "site/config/site_config.php"
     "site/public/listen.php"
     "site/public/timeline.php"
     "site/public/get_events.php"
     "site/public/clear_events.php"
+    "site/public/recordings.php"
+    "site/public/get_recordings.php"
+    "site/public/get_recording_audio.php"
+    "site/public/delete_recording.php"
+    "site/public/clear_recordings.php"
     "site/public/js/timeline.js"
+    "site/public/js/recordings.js"
     "site/src/events.php"
+    "site/src/recordings.php"
     "site/templates/navbar.php"
     "site/public/lang/en/common.json"
     "site/public/lang/en/timeline.json"
+    "site/public/lang/en/recordings.json"
+    "site/public/lang/en/listen_settings.json"
     "site/public/lang/no/common.json"
     "site/public/lang/no/timeline.json"
+    "site/public/lang/no/recordings.json"
+    "site/public/lang/no/listen_settings.json"
     "site/public/lang/pt-br/common.json"
     "site/public/lang/pt-br/main.json"
     "site/public/lang/pt-br/index.json"
@@ -80,6 +95,7 @@ FILES=(
     "site/public/lang/pt-br/system_settings.json"
     "site/public/lang/pt-br/debugging.json"
     "site/public/lang/pt-br/timeline.json"
+    "site/public/lang/pt-br/recordings.json"
 )
 
 # ── 1. Validar o pacote ────────────────────────────────────────────────────────
@@ -180,20 +196,43 @@ else
 fi
 
 # ── 6. Patch do config.json (preserva credenciais e customizações) ─────────────
-info "Atualizando config/config.json (idioma pt-br)..."
+info "Atualizando config/config.json (idioma pt-br, configurações de gravação)..."
 PATCH_PY=$(cat <<'PYEOF'
-import json, sys
+import json, sys, collections
 path = sys.argv[1]
 with open(path, encoding='utf-8') as fh:
-    cfg = json.load(fh)
-lang = cfg.get('language', {}).get('current')
+    cfg = json.load(fh, object_pairs_hook=collections.OrderedDict)
 changed = False
+lang = cfg.get('language', {}).get('current')
 if lang is not None:
     if lang.get('type') != 'CHAR(5) NOT NULL':
         lang['type'] = 'CHAR(5) NOT NULL'; changed = True
     vals = lang.setdefault('values', [])
     if 'pt-br' not in vals:
         vals.append('pt-br'); changed = True
+listen = cfg.get('listen_settings')
+if listen is not None:
+    if 'enable_recording' not in listen:
+        new_listen = collections.OrderedDict()
+        for key, value in listen.items():
+            if key == 'amplification':
+                new_listen['enable_recording'] = collections.OrderedDict([
+                    ('group', 'recording'),
+                    ('name', 'enable_recording'),
+                    ('type', 'BOOLEAN NOT NULL'),
+                    ('initial_value', True)])
+                new_listen['recording_max_storage'] = collections.OrderedDict([
+                    ('group', 'recording'),
+                    ('name', 'recording_max_storage'),
+                    ('type', 'INT UNSIGNED NOT NULL'),
+                    ('initial_value', 500),
+                    ('range', collections.OrderedDict([
+                        ('min', 50), ('max', 5000), ('step', 50)])),
+                    ('disabled_when', {'enable_recording': {
+                        'operator': '!=', 'value': '1'}})])
+            new_listen[key] = value
+        cfg['listen_settings'] = new_listen
+        changed = True
 if changed:
     with open(path, 'w', encoding='utf-8') as fh:
         json.dump(cfg, fh, indent=4, ensure_ascii=False)
@@ -251,7 +290,8 @@ run_sql() {
 }
 
 if $DRY_RUN; then
-    echo "    migraria a coluna language.current e criaria a tabela events"
+    echo "    migraria a coluna language.current, criaria a tabela events"
+    echo "    e adicionaria as colunas de gravação em listen_settings"
 elif ! command -v mysql &>/dev/null; then
     warn "Cliente mysql não encontrado; o banco será migrado automaticamente pelo site na primeira execução."
 elif ! run_sql "SELECT 1;" >/dev/null; then
@@ -269,6 +309,41 @@ else
         \`type\` VARCHAR(20) NOT NULL,
         \`recorded_at\` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP);" && \
         ok "  Tabela 'events' verificada/criada."
+    HAS_ENABLE_RECORDING=$(run_sql "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='$DB_NAME' AND TABLE_NAME='listen_settings' AND COLUMN_NAME='enable_recording';")
+    if [[ "$HAS_ENABLE_RECORDING" == "0" ]]; then
+        run_sql "ALTER TABLE \`listen_settings\` ADD COLUMN \`enable_recording\` BOOLEAN NOT NULL DEFAULT TRUE;" && \
+            ok "  Coluna 'listen_settings.enable_recording' adicionada."
+    else
+        ok "  Coluna 'listen_settings.enable_recording' já existe."
+    fi
+    HAS_MAX_STORAGE=$(run_sql "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='$DB_NAME' AND TABLE_NAME='listen_settings' AND COLUMN_NAME='recording_max_storage';")
+    if [[ "$HAS_MAX_STORAGE" == "0" ]]; then
+        run_sql "ALTER TABLE \`listen_settings\` ADD COLUMN \`recording_max_storage\` INT UNSIGNED NOT NULL DEFAULT 500;" && \
+            ok "  Coluna 'listen_settings.recording_max_storage' adicionada."
+    else
+        ok "  Coluna 'listen_settings.recording_max_storage' já existe."
+    fi
+fi
+
+# ── 8b. Pasta de gravações ─────────────────────────────────────────────────────
+echo ""
+info "Verificando a pasta de gravações..."
+RECORDINGS_DIR="${BM_RECORDINGS_DIR:-$INSTALL_DIR/recordings}"
+if $DRY_RUN; then
+    echo "    criaria $RECORDINGS_DIR (se ausente) com permissões de escrita"
+else
+    mkdir -p "$RECORDINGS_DIR"
+    sudo chown "$BM_USER:$BM_WEB_GROUP" "$RECORDINGS_DIR" 2>/dev/null || true
+    sudo chmod "${BM_WRITE_PERMISSIONS:-770}" "$RECORDINGS_DIR" 2>/dev/null || true
+    # Registra BM_RECORDINGS_DIR nos arquivos de ambiente, se ainda não estiver lá
+    if [[ -f "$ENV_FILE" ]] && ! grep -q "BM_RECORDINGS_DIR" "$ENV_FILE"; then
+        echo "export BM_RECORDINGS_DIR=$RECORDINGS_DIR" >> "$ENV_FILE"
+    fi
+    SERVICE_ENV_FILE="$INSTALL_DIR/env/envvars"
+    if [[ -f "$SERVICE_ENV_FILE" ]] && ! grep -q "BM_RECORDINGS_DIR" "$SERVICE_ENV_FILE"; then
+        echo "BM_RECORDINGS_DIR=$RECORDINGS_DIR" >> "$SERVICE_ENV_FILE"
+    fi
+    ok "Pasta de gravações pronta: $RECORDINGS_DIR"
 fi
 
 # ── 9. Reiniciar Apache ────────────────────────────────────────────────────────
@@ -303,5 +378,13 @@ echo "  • Tradução para Português (Brasil) no menu de idioma"
 echo "  • Nova tela de Histórico (timeline.php) que registra"
 echo "    automaticamente cada evento detectado (choro, balbucio, som),"
 echo "    com filtro por tipo, agrupamento por dia e limpeza do histórico"
+echo "  • Gravação contínua no modo de notificação: o áudio é salvo em"
+echo "    segmentos e os mais antigos são apagados automaticamente quando"
+echo "    o limite de armazenamento é atingido (configurável)"
+echo "  • Nova tela de Gravações com player, marcando os momentos em que"
+echo "    houve identificação de choro (clique no marcador para ouvir)"
+echo ""
+echo "  Obs.: reinicie o modo de notificação (ou o dispositivo) para que"
+echo "  a gravação comece a funcionar."
 echo "════════════════════════════════════════════════════"
 echo ""

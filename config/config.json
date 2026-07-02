@@ -129,6 +129,29 @@
                 "step": 1
             }
         },
+        "enable_recording": {
+            "group": "recording",
+            "name": "enable_recording",
+            "type": "BOOLEAN NOT NULL",
+            "initial_value": true
+        },
+        "recording_max_storage": {
+            "group": "recording",
+            "name": "recording_max_storage",
+            "type": "INT UNSIGNED NOT NULL",
+            "initial_value": 500,
+            "range": {
+                "min": 50,
+                "max": 5000,
+                "step": 50
+            },
+            "disabled_when": {
+                "enable_recording": {
+                    "operator": "!=",
+                    "value": "1"
+                }
+            }
+        },
         "amplification": {
             "group": "recording",
             "name": "amplification",

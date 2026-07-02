@@ -10,3 +10,4 @@ define('LANGUAGE_DIR', realpath(__DIR__ . '/../public/lang'));
 define('LIBRARY_DIR', realpath(__DIR__ . '/../public/library'));
 define('DOCS_DIR', realpath(__DIR__ . '/../public/docs'));
 define('CONTROL_DIR', realpath(__DIR__ . '/../../control'));
+define('RECORDINGS_DIR', getenv('BM_RECORDINGS_DIR') ?: dirname(SITE_DIR) . '/recordings');

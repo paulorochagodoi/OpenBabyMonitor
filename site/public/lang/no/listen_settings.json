@@ -24,5 +24,7 @@
     "g_notify_on": "Varsle om",
     "g_notifications": "Varsling",
     "g_recording": "Opptak",
-    "g_interpretation": "Lydtolkning"
+    "g_interpretation": "Lydtolkning",
+    "enable_recording": "Lagre opptak",
+    "recording_max_storage": "Maks lagringsplass for opptak (MB)"
 }
