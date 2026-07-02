@@ -133,6 +133,14 @@ define('ANY_KNOWN_NETWORKS', anyKnownNetworks($_DATABASE));
             <?php echo LANG['nav_timeline']; ?>
           </a>
         </li>
+        <li class="nav-item">
+          <a id="recordings_nav_link" class="nav-link<?php echo LOCATION == 'recordings' ? ' active' : ''; ?> d-flex align-items-center disabled" href="recordings.php">
+            <svg class="bi me-2" style="height: 1.1em; width: 1.1em;" fill="currentColor">
+              <use href="media/bootstrap-icons.svg#record-circle" />
+            </svg>
+            <?php echo LANG['nav_recordings']; ?>
+          </a>
+        </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle d-flex align-items-center disabled" href="#" data-bs-toggle="dropdown">
             <svg class="bi me-2" style="height: 1.1em; width: 1.1em;" fill="currentColor">

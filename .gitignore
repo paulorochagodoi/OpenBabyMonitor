@@ -203,6 +203,7 @@ cython_debug/
 
 library/
 detection/data/
+/recordings/
 
 bootstrap-icons.svg
 

@@ -5,6 +5,7 @@ import os
 import time
 import pathlib
 import json
+import queue
 import collections
 import multiprocessing
 import numpy as np
@@ -13,6 +14,7 @@ sys.path.append(os.path.join(os.environ['BM_DIR'], 'detection'))
 import features
 import control
 import mic
+import recording
 
 MODE = 'listen'
 
@@ -198,6 +200,8 @@ def listen_with_settings_sound_level_threshold(
         fraction_threshold=60,
         consecutive_recordings=5,
         min_notification_interval=180,
+        enable_recording=True,
+        recording_max_storage=500,
         **kwargs):
     control_dir = pathlib.Path(os.environ['BM_DIR']) / 'control'
     comm_dir = control_dir / '.comm'
@@ -216,11 +220,18 @@ def listen_with_settings_sound_level_threshold(
         consecutive_recordings=consecutive_recordings,
         min_notification_interval=min_notification_interval)
 
+    recorder = create_rolling_recorder(feature_provider, enable_recording,
+                                       recording_max_storage)
+
     control.signal_mode_started(MODE)
 
     while True:
         last_start_time = time.time()
         _, bg_sound_level, signal_sound_level, record_time = feature_provider()
+
+        if recorder is not None:
+            recorder.add_chunk(feature_provider.recorder.last_waveform,
+                               record_time)
 
         notifier.add_sound_level_measurement(signal_sound_level)
         notification = notifier.detect_notification()
@@ -230,6 +241,8 @@ def listen_with_settings_sound_level_threshold(
 
         if notification is not None:
             write_notification(notification_file, notification)
+            if recorder is not None:
+                recorder.add_marker(record_time, 'sound')
 
         time.sleep(max(0, interval - (time.time() - last_start_time)))
 
@@ -247,8 +260,12 @@ def listen_with_settings_network(config,
                                  notify_on_crying=True,
                                  notify_and_or='or',
                                  notify_on_babbling=False,
+                                 enable_recording=True,
+                                 recording_max_storage=500,
                                  **kwargs):
     control_dir = pathlib.Path(os.environ['BM_DIR']) / 'control'
+
+    marker_queue = multiprocessing.Queue()
 
     worker = QueueWorker(
         process_features, config, control_dir, model,
@@ -258,7 +275,7 @@ def listen_with_settings_network(config,
              min_notification_interval=min_notification_interval,
              notify_on_crying=notify_on_crying,
              notify_and_or=notify_and_or,
-             notify_on_babbling=notify_on_babbling))
+             notify_on_babbling=notify_on_babbling), marker_queue)
 
     with worker as task_queue:
         mic.update_current_mic_volume(100)
@@ -271,19 +288,46 @@ def listen_with_settings_network(config,
             amplification=amplification,
             standardize=True)
 
+        recorder = create_rolling_recorder(feature_provider, enable_recording,
+                                           recording_max_storage)
+
         control.signal_mode_started(MODE)
 
         while True:
             last_start_time = time.time()
             feature, bg_sound_level, signal_sound_level, record_time = feature_provider(
             )
+
+            if recorder is not None:
+                recorder.add_chunk(feature_provider.recorder.last_waveform,
+                                   record_time)
+                drain_marker_queue(marker_queue, recorder)
+
             task_queue.put(
                 (feature, bg_sound_level, signal_sound_level, record_time))
             time.sleep(max(0, interval - (time.time() - last_start_time)))
 
 
+def drain_marker_queue(marker_queue, recorder):
+    while True:
+        try:
+            marker_record_time, marker_type = marker_queue.get_nowait()
+        except queue.Empty:
+            break
+        recorder.add_marker(marker_record_time, marker_type)
+
+
+def create_rolling_recorder(feature_provider, enable_recording,
+                            recording_max_storage):
+    if not enable_recording:
+        return None
+    return recording.RollingRecorder(
+        feature_provider.feature_extractor.sampling_rate,
+        max_storage_mb=recording_max_storage)
+
+
 def process_features(task_queue, config, control_dir, model,
-                     notifier_settings):
+                     notifier_settings, marker_queue):
 
     notifier = create_inference_notifier(config, **notifier_settings)
 
@@ -301,6 +345,7 @@ def process_features(task_queue, config, control_dir, model,
     )
     probabilities = find_probabilities(feature, ambient_probabilities, model)
     notifier.add_prediction(probabilities)
+    send_cry_marker_if_detected(notifier, marker_queue, prev_record_time)
 
     while True:
         feature, bg_sound_level, signal_sound_level, record_time = task_queue.get(
@@ -317,10 +362,17 @@ def process_features(task_queue, config, control_dir, model,
                                            model)
 
         notifier.add_prediction(probabilities)
+        send_cry_marker_if_detected(notifier, marker_queue, record_time)
         notification = notifier.detect_notification()
 
         if notification is not None:
             write_notification(notification_file, notification)
+
+
+def send_cry_marker_if_detected(notifier, marker_queue, record_time):
+    if len(notifier.prediction_history) > 0 and \
+            notifier.prediction_history[-1] == notifier.labels['bad']:
+        marker_queue.put((record_time, 'bad'))
 
 
 def find_probabilities(feature, ambient_probabilities, model):

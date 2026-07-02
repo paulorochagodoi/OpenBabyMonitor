@@ -1,0 +1,16 @@
+{
+    "recordings": "Opptak",
+    "recordings_empty": "Ingen opptak ennå. Opptak gjøres mens babycallen er i varselmodus.",
+    "recordings_clear": "Slett alle",
+    "sure_want_to_clear_recordings": "Er du sikker på at du vil slette alle opptakene?",
+    "sure_want_to_delete_recording": "Er du sikker på at du vil slette dette opptaket?",
+    "cry_markers": "{} gråteøyeblikk",
+    "no_cry_markers": "Ingen gråt oppdaget",
+    "total_storage": "Lagringsplass brukt",
+    "today": "I dag",
+    "yesterday": "I går",
+    "auto_refresh": "Automatisk oppdatering",
+    "nav_recordings": "Opptak",
+    "download": "Last ned",
+    "video_playback_hint": "Hvis det ikke spilles av i nettleseren, last ned filen."
+}

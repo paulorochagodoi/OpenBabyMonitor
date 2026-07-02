@@ -17,6 +17,9 @@ The purpose of this project is to make use of the great flexibility and availabi
 * Detects baby crying using either a simple loudness threshold or a neural network trained on Google's [AudioSet](https://research.google.com/audioset/) dataset to distinguish between crying, babbling and ambient sounds.
 * Live audio streaming and optionally video streaming in up to 1080p resolution.
 * Event history timeline that automatically logs every detection (crying, babbling and significant sounds), with filtering by type, grouping by day and an option to clear the history.
+* Continuous rolling audio recording while in notification mode: the audio is saved in segments and the oldest recordings are deleted automatically once a configurable storage limit is reached. The moments where crying was identified are marked on each recording, and a dedicated Recordings page lets you play them back and jump straight to the marked moments.
+* Optional video recording while in video mode (with audio), sharing the same automatic deletion of the oldest recordings. Video recordings appear on the same Recordings page for playback and download. (Crying is only detected in notification mode, so cry markers apply to the audio recordings.)
+* A switch in the system settings to turn off the Raspberry Pi's green (activity) and red (power) status LEDs, useful in a dark bedroom. The setting persists across reboots.
 * Multi-language interface, currently available in English, Norwegian and Brazilian Portuguese.
 * Low power consumption (see [Power consumption](#powe dr-consumption)), enabling tens of hours of battery life when powered by even a modestly sized portable power bank.
 

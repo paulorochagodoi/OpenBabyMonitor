@@ -1,0 +1,16 @@
+{
+    "recordings": "Recordings",
+    "recordings_empty": "No recordings yet. Recordings are made while the monitor is in notification mode.",
+    "recordings_clear": "Delete all",
+    "sure_want_to_clear_recordings": "Are you sure you want to delete all recordings?",
+    "sure_want_to_delete_recording": "Are you sure you want to delete this recording?",
+    "cry_markers": "{} crying moment(s)",
+    "no_cry_markers": "No crying detected",
+    "total_storage": "Storage used",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "auto_refresh": "Auto-refresh",
+    "nav_recordings": "Recordings",
+    "download": "Download",
+    "video_playback_hint": "If it does not play in the browser, download the file."
+}
