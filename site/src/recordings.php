@@ -2,7 +2,10 @@
 require_once(dirname(__DIR__) . '/config/error_config.php');
 require_once(dirname(__DIR__) . '/config/path_config.php');
 
-define('RECORDING_NAME_PATTERN', '/^rec_\d{8}_\d{6}$/');
+// Audio recordings are named rec_<timestamp>[.wav], video recordings
+// vid_<timestamp>[.ts]. An optional numeric suffix (_1, _2, ...) avoids
+// name collisions.
+define('RECORDING_NAME_PATTERN', '/^(rec|vid)_\d{8}_\d{6}(_\d+)?$/');
 define('RECORDING_WAV_HEADER_SIZE', 44);
 define('RECORDING_BYTES_PER_SAMPLE', 2);
 
@@ -25,12 +28,70 @@ function isValidRecordingName($name) {
   return preg_match(RECORDING_NAME_PATTERN, $name) === 1;
 }
 
-function getRecordingWavPath($name) {
-  return RECORDINGS_DIR . "/$name.wav";
+function getRecordingKind($name) {
+  return strpos($name, 'vid_') === 0 ? 'video' : 'audio';
+}
+
+function getRecordingMediaExtension($name) {
+  return getRecordingKind($name) === 'video' ? 'ts' : 'wav';
+}
+
+function getRecordingMediaPath($name) {
+  return RECORDINGS_DIR . "/$name." . getRecordingMediaExtension($name);
 }
 
 function getRecordingSidecarPath($name) {
   return RECORDINGS_DIR . "/$name.json";
+}
+
+function readRecordingSidecar($name) {
+  $sidecar_path = getRecordingSidecarPath($name);
+  if (!file_exists($sidecar_path)) {
+    return array();
+  }
+  $sidecar = json_decode(file_get_contents($sidecar_path), true);
+  return is_array($sidecar) ? $sidecar : array();
+}
+
+function describeRecording($media_path) {
+  $ext = pathinfo($media_path, PATHINFO_EXTENSION);
+  $name = basename($media_path, '.' . $ext);
+  if (!isValidRecordingName($name)) {
+    return null;
+  }
+  $kind = getRecordingKind($name);
+  $size = filesize($media_path);
+  $sidecar = readRecordingSidecar($name);
+
+  $start_time = isset($sidecar['start_time']) ? floatval($sidecar['start_time']) : null;
+  if ($start_time === null) {
+    $dt = DateTime::createFromFormat('Ymd_His', substr($name, 4, 15));
+    $start_time = $dt ? $dt->getTimestamp() : filemtime($media_path);
+  }
+
+  $markers = array();
+  if (isset($sidecar['markers']) && is_array($sidecar['markers'])) {
+    $markers = $sidecar['markers'];
+    usort($markers, function ($a, $b) {
+      return $a['time'] <=> $b['time'];
+    });
+  }
+
+  if ($kind === 'audio') {
+    $sampling_rate = isset($sidecar['sampling_rate']) ? intval($sidecar['sampling_rate']) : 8000;
+    $duration = max(0, $size - RECORDING_WAV_HEADER_SIZE) / (RECORDING_BYTES_PER_SAMPLE * max(1, $sampling_rate));
+  } else {
+    $duration = isset($sidecar['duration']) ? floatval($sidecar['duration']) : 0;
+  }
+
+  return array(
+    'name' => $name,
+    'kind' => $kind,
+    'start_time' => $start_time,
+    'duration' => round($duration, 1),
+    'size' => $size,
+    'markers' => $markers
+  );
 }
 
 function listRecordings() {
@@ -38,42 +99,15 @@ function listRecordings() {
   if (!is_dir(RECORDINGS_DIR)) {
     return $recordings;
   }
-  foreach (glob(RECORDINGS_DIR . '/rec_*.wav') as $wav_path) {
-    $name = basename($wav_path, '.wav');
-    if (!isValidRecordingName($name)) {
-      continue;
+  $media_paths = array_merge(
+    glob(RECORDINGS_DIR . '/rec_*.wav'),
+    glob(RECORDINGS_DIR . '/vid_*.ts')
+  );
+  foreach ($media_paths as $media_path) {
+    $recording = describeRecording($media_path);
+    if ($recording !== null) {
+      $recordings[] = $recording;
     }
-    $size = filesize($wav_path);
-    $sidecar_path = getRecordingSidecarPath($name);
-    $sampling_rate = 8000;
-    $start_time = null;
-    $markers = array();
-    if (file_exists($sidecar_path)) {
-      $sidecar = json_decode(file_get_contents($sidecar_path), true);
-      if (is_array($sidecar)) {
-        $sampling_rate = isset($sidecar['sampling_rate']) ? intval($sidecar['sampling_rate']) : 8000;
-        $start_time = isset($sidecar['start_time']) ? floatval($sidecar['start_time']) : null;
-        if (isset($sidecar['markers']) && is_array($sidecar['markers'])) {
-          $markers = $sidecar['markers'];
-        }
-      }
-    }
-    if ($start_time === null) {
-      // Fall back to parsing the timestamp in the file name
-      $dt = DateTime::createFromFormat('Ymd_His', substr($name, 4));
-      $start_time = $dt ? $dt->getTimestamp() : filemtime($wav_path);
-    }
-    usort($markers, function ($a, $b) {
-      return $a['time'] <=> $b['time'];
-    });
-    $duration = max(0, $size - RECORDING_WAV_HEADER_SIZE) / (RECORDING_BYTES_PER_SAMPLE * max(1, $sampling_rate));
-    $recordings[] = array(
-      'name' => $name,
-      'start_time' => $start_time,
-      'duration' => round($duration, 1),
-      'size' => $size,
-      'markers' => $markers
-    );
   }
   usort($recordings, function ($a, $b) {
     return $b['start_time'] <=> $a['start_time'];
@@ -85,11 +119,11 @@ function deleteRecording($name) {
   if (!isValidRecordingName($name)) {
     return false;
   }
-  $wav_path = getRecordingWavPath($name);
+  $media_path = getRecordingMediaPath($name);
   $sidecar_path = getRecordingSidecarPath($name);
   $deleted = false;
-  if (file_exists($wav_path)) {
-    $deleted = unlink($wav_path);
+  if (file_exists($media_path)) {
+    $deleted = unlink($media_path);
   }
   if (file_exists($sidecar_path)) {
     unlink($sidecar_path);
@@ -103,19 +137,21 @@ function clearRecordings() {
   }
 }
 
-// Streams a recording WAV file with support for HTTP range requests,
-// which the browser audio player needs for seeking.
-function streamRecordingAudio($name) {
+// Streams a recording file with support for HTTP range requests, which the
+// browser audio/video player needs for seeking. Works for both WAV audio
+// and MPEG-TS video recordings.
+function streamRecordingMedia($name) {
   if (!isValidRecordingName($name)) {
     http_response_code(400);
     exit();
   }
-  $wav_path = getRecordingWavPath($name);
-  if (!file_exists($wav_path)) {
+  $media_path = getRecordingMediaPath($name);
+  if (!file_exists($media_path)) {
     http_response_code(404);
     exit();
   }
-  $size = filesize($wav_path);
+  $content_type = getRecordingKind($name) === 'video' ? 'video/mp2t' : 'audio/wav';
+  $size = filesize($media_path);
   $start = 0;
   $end = $size - 1;
 
@@ -138,12 +174,12 @@ function streamRecordingAudio($name) {
     header("Content-Range: bytes $start-$end/$size");
   }
 
-  header('Content-Type: audio/wav');
+  header("Content-Type: $content_type");
   header('Accept-Ranges: bytes');
   header('Content-Length: ' . ($end - $start + 1));
   header('Cache-Control: no-cache');
 
-  $file = fopen($wav_path, 'rb');
+  $file = fopen($media_path, 'rb');
   fseek($file, $start);
   $remaining = $end - $start + 1;
   while ($remaining > 0 && !feof($file) && !connection_aborted()) {

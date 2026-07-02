@@ -10,5 +10,7 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "auto_refresh": "Auto-refresh",
-    "nav_recordings": "Recordings"
+    "nav_recordings": "Recordings",
+    "download": "Download",
+    "video_playback_hint": "If it does not play in the browser, download the file."
 }

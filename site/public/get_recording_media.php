@@ -13,4 +13,4 @@ if (!isset($_GET['name'])) {
   exit();
 }
 
-streamRecordingAudio($_GET['name']);
+streamRecordingMedia($_GET['name']);

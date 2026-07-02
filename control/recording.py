@@ -4,6 +4,7 @@ import os
 import json
 import time
 import struct
+import shutil
 import pathlib
 import collections
 import numpy as np
@@ -170,6 +171,7 @@ class RollingRecorder:
             sidecar_path, {
                 'start_time': self.segment_start_time,
                 'sampling_rate': self.sampling_rate,
+                'kind': 'audio',
                 'markers': self.markers
             })
 
@@ -178,31 +180,115 @@ class RollingRecorder:
             json.dump(content, f)
 
     def cleanup(self):
-        segments = sorted(self.recordings_dir.glob('rec_*.wav'))
-        sizes = {}
-        total_size = 0
-        for segment in segments:
-            sidecar = segment.with_suffix('.json')
-            size = segment.stat().st_size + (sidecar.stat().st_size
-                                             if sidecar.exists() else 0)
-            sizes[segment] = size
-            total_size += size
-
-        for segment in segments:
-            if total_size <= self.max_storage_bytes:
-                break
-            if self.writer is not None and \
-                    segment == pathlib.Path(self.writer.file_path):
-                continue
-            self._remove_if_exists(segment)
-            self._remove_if_exists(segment.with_suffix('.json'))
-            total_size -= sizes[segment]
-
-    def _remove_if_exists(self, path):
-        try:
-            path.unlink()
-        except FileNotFoundError:
-            pass
+        protected = []
+        if self.writer is not None:
+            protected.append(pathlib.Path(self.writer.file_path))
+        enforce_storage_limit(self.recordings_dir, self.max_storage_bytes,
+                              protected=protected)
 
     def close(self):
         self._finalize_segment()
+
+
+# Recording file name prefixes: 'rec_' for audio (WAV), 'vid_' for video (TS)
+AUDIO_GLOB = 'rec_*.wav'
+VIDEO_GLOB = 'vid_*.ts'
+
+
+def _remove_if_exists(path):
+    try:
+        path.unlink()
+    except FileNotFoundError:
+        pass
+
+
+def list_recording_segments(recordings_dir):
+    '''Returns the media files (audio WAV and video TS) in the recordings
+    directory, sorted from oldest to newest by modification time, so that
+    the rolling cleanup deletes the genuinely oldest recording regardless of
+    whether it is audio or video.'''
+    recordings_dir = pathlib.Path(recordings_dir)
+    segments = list(recordings_dir.glob(AUDIO_GLOB)) + \
+        list(recordings_dir.glob(VIDEO_GLOB))
+
+    def sort_key(path):
+        try:
+            return path.stat().st_mtime
+        except FileNotFoundError:
+            return 0
+
+    return sorted(segments, key=sort_key)
+
+
+def enforce_storage_limit(recordings_dir, max_storage_bytes, protected=()):
+    '''Deletes the oldest recordings (and their JSON sidecars) until the
+    total size of the recordings directory is within the limit.'''
+    protected = set(pathlib.Path(p) for p in protected)
+    segments = list_recording_segments(recordings_dir)
+
+    sizes = {}
+    total_size = 0
+    for segment in segments:
+        sidecar = segment.with_suffix('.json')
+        size = segment.stat().st_size + (sidecar.stat().st_size
+                                         if sidecar.exists() else 0)
+        sizes[segment] = size
+        total_size += size
+
+    for segment in segments:
+        if total_size <= max_storage_bytes:
+            break
+        if segment in protected:
+            continue
+        _remove_if_exists(segment)
+        _remove_if_exists(segment.with_suffix('.json'))
+        total_size -= sizes[segment]
+
+
+def finalize_video_recordings(recordings_dir,
+                              source_dirs,
+                              since_time,
+                              max_storage_mb=500):
+    '''Moves video segments (.ts) that picam wrote since ``since_time`` from
+    the given source directories into the persistent recordings directory,
+    each with a JSON sidecar, then enforces the storage limit. Returns the
+    list of resulting recording stems.'''
+    recordings_dir = pathlib.Path(recordings_dir)
+    recordings_dir.mkdir(parents=True, exist_ok=True)
+
+    finalized = []
+    for source_dir in source_dirs:
+        source_dir = pathlib.Path(source_dir)
+        if not source_dir.is_dir():
+            continue
+        for ts_file in sorted(source_dir.glob('*.ts')):
+            try:
+                mtime = ts_file.stat().st_mtime
+            except FileNotFoundError:
+                continue
+            # Allow a small margin so we do not miss the file picam is
+            # finalizing right as recording stops
+            if mtime + 1 < since_time:
+                continue
+            stem = 'vid_{}'.format(
+                time.strftime('%Y%m%d_%H%M%S', time.localtime(mtime)))
+            target = recordings_dir / (stem + '.ts')
+            suffix = 1
+            while target.exists():
+                target = recordings_dir / ('{}_{}.ts'.format(stem, suffix))
+                suffix += 1
+            try:
+                shutil.move(str(ts_file), str(target))
+            except (OSError, shutil.Error):
+                continue
+            sidecar = target.with_suffix('.json')
+            with open(sidecar, 'w') as f:
+                json.dump({
+                    'start_time': mtime,
+                    'kind': 'video',
+                    'markers': []
+                }, f)
+            finalized.append(target.stem)
+
+    enforce_storage_limit(recordings_dir, int(max_storage_mb * 1e6))
+    return finalized

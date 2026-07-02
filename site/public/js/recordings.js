@@ -130,28 +130,68 @@ function renderRecordings(recordings) {
 }
 
 function buildRecordingItem(rec, dt) {
+    return rec.kind === 'video' ? buildVideoItem(rec, dt) : buildAudioItem(rec, dt);
+}
+
+function buildAudioItem(rec, dt) {
     var cryMarkers = rec.markers.filter(function (m) { return m.type === 'bad'; });
     var hasCry = cryMarkers.length > 0;
     var ranges = mergeMarkers(rec.markers);
 
-    var startStr = formatTime(dt);
-    var endStr   = formatTime(new Date((rec.start_time + rec.duration) * 1000));
-
+    var mediaUrl = 'get_recording_media.php?name=' + encodeURIComponent(rec.name);
     var markerSummary = hasCry
         ? LANG_CRY_MARKERS.replace('{}', cryMarkers.length)
         : LANG_NO_CRY_MARKERS;
 
-    var html =
+    return buildItemShell(rec, dt,
+        {
+            icon: hasCry ? 'emoji-frown-fill' : 'mic-fill',
+            iconClass: hasCry ? ' has-cry' : '',
+            metaExtra: ' · ' + escapeHtml(markerSummary)
+        },
+        '<audio controls preload="none">' +
+            '<source src="' + mediaUrl + '" type="audio/wav">' +
+        '</audio>' +
+        buildMarkerBar(ranges, rec.duration) +
+        buildMarkerChips(ranges));
+}
+
+function buildVideoItem(rec, dt) {
+    var mediaUrl = 'get_recording_media.php?name=' + encodeURIComponent(rec.name);
+    return buildItemShell(rec, dt,
+        {
+            icon: 'camera-video-fill',
+            iconClass: ' is-video',
+            metaExtra: ''
+        },
+        '<video controls preload="none" playsinline>' +
+            '<source src="' + mediaUrl + '" type="video/mp2t">' +
+        '</video>' +
+        '<div class="mt-2">' +
+            '<a class="btn btn-sm btn-outline-secondary" href="' + mediaUrl + '" download="' +
+                escapeHtml(rec.name) + '.ts">' +
+                '<svg class="bi me-1" style="width:1em;height:1em;" fill="currentColor">' +
+                    '<use href="media/bootstrap-icons.svg#download"/></svg>' +
+                LANG_DOWNLOAD +
+            '</a>' +
+            '<span class="recording-meta ms-2">' + escapeHtml(LANG_VIDEO_HINT) + '</span>' +
+        '</div>');
+}
+
+function buildItemShell(rec, dt, opts, playerInner) {
+    var startStr = formatTime(dt);
+    var endStr   = formatTime(new Date((rec.start_time + rec.duration) * 1000));
+
+    return (
         '<div class="recording-item" data-name="' + escapeHtml(rec.name) + '" data-duration="' + rec.duration + '">' +
             '<div class="recording-header">' +
-                '<div class="recording-icon' + (hasCry ? ' has-cry' : '') + '">' +
-                    '<svg fill="currentColor" class="bi"><use href="media/bootstrap-icons.svg#' +
-                        (hasCry ? 'emoji-frown-fill' : 'mic-fill') + '"/></svg>' +
+                '<div class="recording-icon' + opts.iconClass + '">' +
+                    '<svg fill="currentColor" class="bi"><use href="media/bootstrap-icons.svg#' + opts.icon + '"/></svg>' +
                 '</div>' +
                 '<div class="flex-grow-1">' +
                     '<div class="recording-label text-bm">' + escapeHtml(startStr) + ' – ' + escapeHtml(endStr) + '</div>' +
                     '<div class="recording-meta">' + escapeHtml(formatDuration(rec.duration)) + ' · ' +
-                        escapeHtml(formatSize(rec.size)) + ' · ' + escapeHtml(markerSummary) + '</div>' +
+                        escapeHtml(formatSize(rec.size)) + opts.metaExtra + '</div>' +
                 '</div>' +
                 '<button class="btn btn-sm btn-outline-primary play-toggle-btn">' +
                     '<svg class="bi" style="width:1em;height:1em;" fill="currentColor">' +
@@ -162,15 +202,8 @@ function buildRecordingItem(rec, dt) {
                         '<use href="media/bootstrap-icons.svg#trash"/></svg>' +
                 '</button>' +
             '</div>' +
-            '<div class="recording-player" style="display: none;">' +
-                '<audio controls preload="none">' +
-                    '<source src="get_recording_audio.php?name=' + encodeURIComponent(rec.name) + '" type="audio/wav">' +
-                '</audio>' +
-                buildMarkerBar(ranges, rec.duration) +
-                buildMarkerChips(ranges) +
-            '</div>' +
-        '</div>';
-    return html;
+            '<div class="recording-player" style="display: none;">' + playerInner + '</div>' +
+        '</div>');
 }
 
 function mergeMarkers(markers) {
@@ -223,17 +256,17 @@ function togglePlayer($item) {
     var $player = $item.find('.recording-player');
     if ($player.is(':visible')) {
         $player.hide();
-        $player.find('audio')[0].pause();
+        $player.find('audio, video')[0].pause();
     } else {
         $player.show();
-        $player.find('audio')[0].play();
+        $player.find('audio, video')[0].play();
     }
 }
 
 function seekPlayer($item, time) {
     var $player = $item.find('.recording-player');
     $player.show();
-    var audio = $player.find('audio')[0];
+    var audio = $player.find('audio, video')[0];
     var doSeek = function () {
         audio.currentTime = Math.max(0, time - 2);
         audio.play();
@@ -248,7 +281,7 @@ function seekPlayer($item, time) {
 
 function rememberPlayback($list) {
     var playing = null;
-    $list.find('audio').each(function () {
+    $list.find('audio, video').each(function () {
         if (!this.paused) {
             playing = {
                 name: $(this).closest('.recording-item').data('name'),

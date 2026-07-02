@@ -10,5 +10,7 @@
     "today": "I dag",
     "yesterday": "I går",
     "auto_refresh": "Automatisk oppdatering",
-    "nav_recordings": "Opptak"
+    "nav_recordings": "Opptak",
+    "download": "Last ned",
+    "video_playback_hint": "Hvis det ikke spilles av i nettleseren, last ned filen."
 }

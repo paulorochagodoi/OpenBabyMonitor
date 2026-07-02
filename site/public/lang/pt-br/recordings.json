@@ -10,5 +10,7 @@
     "today": "Hoje",
     "yesterday": "Ontem",
     "auto_refresh": "Atualização automática",
-    "nav_recordings": "Gravações"
+    "nav_recordings": "Gravações",
+    "download": "Baixar",
+    "video_playback_hint": "Se não tocar no navegador, baixe o arquivo."
 }

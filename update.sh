@@ -59,6 +59,8 @@ $DRY_RUN && warn "Modo simulação (--dry-run): nenhum arquivo será alterado."
 FILES=(
     "control/listen.py"
     "control/recording.py"
+    "control/videostream.py"
+    "control/root_startup.sh"
     "detection/features.py"
     "site/config/language_config.php"
     "site/config/path_config.php"
@@ -69,22 +71,28 @@ FILES=(
     "site/public/clear_events.php"
     "site/public/recordings.php"
     "site/public/get_recordings.php"
-    "site/public/get_recording_audio.php"
+    "site/public/get_recording_media.php"
     "site/public/delete_recording.php"
     "site/public/clear_recordings.php"
+    "site/public/set_status_leds.php"
+    "site/public/system_settings.php"
     "site/public/js/timeline.js"
     "site/public/js/recordings.js"
     "site/src/events.php"
     "site/src/recordings.php"
+    "site/servercontrol/process_flag.sh"
+    "site/servercontrol/set_status_leds.sh"
     "site/templates/navbar.php"
     "site/public/lang/en/common.json"
     "site/public/lang/en/timeline.json"
     "site/public/lang/en/recordings.json"
     "site/public/lang/en/listen_settings.json"
+    "site/public/lang/en/system_settings.json"
     "site/public/lang/no/common.json"
     "site/public/lang/no/timeline.json"
     "site/public/lang/no/recordings.json"
     "site/public/lang/no/listen_settings.json"
+    "site/public/lang/no/system_settings.json"
     "site/public/lang/pt-br/common.json"
     "site/public/lang/pt-br/main.json"
     "site/public/lang/pt-br/index.json"
@@ -233,6 +241,10 @@ if listen is not None:
             new_listen[key] = value
         cfg['listen_settings'] = new_listen
         changed = True
+commands = cfg.get('control', {}).get('server_actions', {}).get('commands')
+if commands is not None and 'set_status_leds' not in commands:
+    commands['set_status_leds'] = '$BM_SERVERCONTROL_DIR/perform_action.sh set_status_leds'
+    changed = True
 if changed:
     with open(path, 'w', encoding='utf-8') as fh:
         json.dump(cfg, fh, indent=4, ensure_ascii=False)
@@ -383,8 +395,12 @@ echo "    segmentos e os mais antigos são apagados automaticamente quando"
 echo "    o limite de armazenamento é atingido (configurável)"
 echo "  • Nova tela de Gravações com player, marcando os momentos em que"
 echo "    houve identificação de choro (clique no marcador para ouvir)"
+echo "  • Gravação de vídeo durante o modo de vídeo (com áudio), também"
+echo "    com limpeza automática do mais antigo; aparece na tela de Gravações"
+echo "  • Botão em Configurações do Sistema para desligar os LEDs de status"
+echo "    (verde/vermelho) do Raspberry Pi, útil em quarto escuro"
 echo ""
-echo "  Obs.: reinicie o modo de notificação (ou o dispositivo) para que"
-echo "  a gravação comece a funcionar."
+echo "  Obs.: reinicie o dispositivo para aplicar as mudanças de serviço"
+echo "  (gravação e controle dos LEDs no boot)."
 echo "════════════════════════════════════════════════════"
 echo ""

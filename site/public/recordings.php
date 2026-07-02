@@ -47,9 +47,19 @@ try {
       background-color: #dc354522;
       color: #dc3545;
     }
+    .recording-icon.is-video {
+      background-color: #6f42c122;
+      color: #6f42c1;
+    }
     .recording-icon svg {
       width: 1.1rem;
       height: 1.1rem;
+    }
+    .recording-player video {
+      width: 100%;
+      max-height: 60vh;
+      border-radius: 0.3rem;
+      background: #000;
     }
     .recording-meta {
       font-size: 0.78rem;
@@ -182,6 +192,8 @@ try {
     const LANG_CRY_MARKERS      = <?php echo json_encode(LANG['cry_markers']); ?>;
     const LANG_NO_CRY_MARKERS   = <?php echo json_encode(LANG['no_cry_markers']); ?>;
     const LANG_TOTAL_STORAGE    = <?php echo json_encode(LANG['total_storage']); ?>;
+    const LANG_DOWNLOAD         = <?php echo json_encode(LANG['download']); ?>;
+    const LANG_VIDEO_HINT       = <?php echo json_encode(LANG['video_playback_hint']); ?>;
     const ACCESS_POINT_ACTIVE = <?php echo ACCESS_POINT_ACTIVE ? 'true' : 'false'; ?>;
   </script>
 

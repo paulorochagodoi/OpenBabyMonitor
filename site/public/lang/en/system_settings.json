@@ -29,5 +29,8 @@
     "timezone_changed": "The server time zone was successfully changed.",
     "hostname_changed": "The server hostname was successfully changed.",
     "device_password_changed": "The server password was successfully changed.",
-    "will_change_url": "Note that this website will get a new URL with the new hostname."
+    "will_change_url": "Note that this website will get a new URL with the new hostname.",
+    "hardware": "Hardware",
+    "disable_status_leds": "Turn off status LEDs",
+    "status_leds_hint": "Turns off the Raspberry Pi's green (activity) and red (power) LEDs. Useful in a dark bedroom. The setting is kept after reboot."
 }
