@@ -10,6 +10,7 @@ var _CURRENT_FILTER = 'all';
 var _AUTO_REFRESH_INTERVAL = null;
 
 $(function () {
+    setDisabledForNavbar(false);
     setupClearButton();
     setupFilters();
     loadEvents();

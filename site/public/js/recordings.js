@@ -5,6 +5,7 @@ var _RECORDINGS = [];
 var MARKER_MERGE_GAP = 15;
 
 $(function () {
+    setDisabledForNavbar(false);
     setupClearButton();
     loadRecordings();
 
