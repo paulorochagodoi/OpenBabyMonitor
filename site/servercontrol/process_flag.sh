@@ -18,6 +18,7 @@ SET_AP_PASSWORD_FLAG=set_ap_password
 SET_COUNTRY_CODE_FLAG=set_country_code
 SET_ENV_VAR=set_env_var
 SELECT_MIC_FLAG=select_mic
+SET_STATUS_LEDS_FLAG=set_status_leds
 
 if [[ ! -f "$BM_SERVER_ACTION_FILE" ]]; then
     exit
@@ -109,6 +110,10 @@ case $FLAG in
 
   $SELECT_MIC_FLAG)
     $BM_SERVERCONTROL_DIR/auto_select_mic.sh 1>&3 2>&4
+    ;;
+
+  $SET_STATUS_LEDS_FLAG)
+    $BM_SERVERCONTROL_DIR/set_status_leds.sh "${ARGUMENTS[@]:1}" 1>&3 2>&4
     ;;
 
   *)

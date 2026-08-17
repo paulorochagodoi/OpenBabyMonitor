@@ -8,6 +8,10 @@ $mode = readCurrentMode($_DATABASE);
 $current_timezone = getenv('BM_TIMEZONE');
 $timezones = getValidTimezones();
 
+$status_leds_state_file = CONTROL_DIR . '/.status_leds_disabled';
+$status_leds_disabled = file_exists($status_leds_state_file)
+  && trim(@file_get_contents($status_leds_state_file)) === '1';
+
 $server_property_changed = null;
 if (isset($_POST['change_timezone'])) {
   $timezone = $_POST['timezone'];
@@ -156,6 +160,16 @@ if ($settings_edited) {
                 </div>
               </form>
             </div>
+            <div class="col-auto">
+              <h2><?php echo LANG['hardware']; ?></h2>
+              <div class="col-auto px-3 mb-3" style="max-width: 20rem;">
+                <div class="form-check form-switch d-flex align-items-center gap-2 mb-2">
+                  <input class="form-check-input" type="checkbox" role="button" id="status_leds_switch" <?php echo $status_leds_disabled ? 'checked' : ''; ?>>
+                  <label class="form-check-label" for="status_leds_switch"><?php echo LANG['disable_status_leds']; ?></label>
+                </div>
+                <p class="text-bm" style="font-size: 0.8rem; opacity: 0.65;"><?php echo LANG['status_leds_hint']; ?></p>
+              </div>
+            </div>
           </div>
         </div>
       </main>
@@ -201,6 +215,24 @@ require_once(TEMPLATES_DIR . '/monitoring_js.php');
 
   $(function() {
     captureElementState(SETTINGS_FORM_ID);
+  });
+
+  $('#status_leds_switch').on('change', function() {
+    var $switch = $(this);
+    var disable = $switch.prop('checked') ? '1' : '0';
+    $switch.prop('disabled', true);
+    $.post('set_status_leds.php', { disable: disable })
+      .done(function(response) {
+        if (!response || !response.success) {
+          $switch.prop('checked', !$switch.prop('checked'));
+        }
+      })
+      .fail(function() {
+        $switch.prop('checked', !$switch.prop('checked'));
+      })
+      .always(function() {
+        $switch.prop('disabled', false);
+      });
   });
 </script>
 

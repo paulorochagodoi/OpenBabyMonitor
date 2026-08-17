@@ -29,5 +29,8 @@
     "timezone_changed": "Ny tidssone ble satt for serveren.",
     "hostname_changed": "Nytt vertsnavn ble satt for serveren.",
     "device_password_changed": "Nytt passord ble satt for serveren.",
-    "will_change_url": "Merk at dette nettstedet vil få en ny URL med det nye vertsnavnet."
+    "will_change_url": "Merk at dette nettstedet vil få en ny URL med det nye vertsnavnet.",
+    "hardware": "Maskinvare",
+    "disable_status_leds": "Slå av status-LEDer",
+    "status_leds_hint": "Slår av Raspberry Pi-ens grønne (aktivitet) og røde (strøm) LEDer. Nyttig i et mørkt soverom. Innstillingen beholdes etter omstart."
 }

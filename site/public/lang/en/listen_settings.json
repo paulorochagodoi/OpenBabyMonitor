@@ -24,5 +24,7 @@
     "g_notify_on": "Notify about",
     "g_notifications": "Notification",
     "g_recording": "Recording",
-    "g_interpretation": "Audio interpretation"
+    "g_interpretation": "Audio interpretation",
+    "enable_recording": "Save recordings",
+    "recording_max_storage": "Max storage for recordings (MB)"
 }

@@ -49,6 +49,7 @@ BM_CONTROL_MIC_ID_FILE=$BM_CONTROL_MIC_DIR/id
 BM_CONTROL_CAM_DIR=$BM_DIR/control/.cam
 BM_CONTROL_CAM_CONNECTED_FILE=$BM_CONTROL_CAM_DIR/connected
 BM_CONTROL_TIME_SYNCED_FILE=$BM_DIR/control/.time_synced
+BM_RECORDINGS_DIR=$BM_DIR/recordings
 
 SETUP_AUDIO=true
 if [[ "$SETUP_AUDIO" = true ]]; then
@@ -171,6 +172,7 @@ if [[ "$SETUP_ENV" = true ]]; then
     echo "export BM_CONTROL_MIC_ID_FILE=$BM_CONTROL_MIC_ID_FILE" >> $BM_ENV_EXPORTS_PATH
     echo "export BM_CONTROL_CAM_CONNECTED_FILE=$BM_CONTROL_CAM_CONNECTED_FILE" >> $BM_ENV_EXPORTS_PATH
     echo "export BM_CONTROL_TIME_SYNCED_FILE=$BM_CONTROL_TIME_SYNCED_FILE" >> $BM_ENV_EXPORTS_PATH
+    echo "export BM_RECORDINGS_DIR=$BM_RECORDINGS_DIR" >> $BM_ENV_EXPORTS_PATH
     echo "export BM_DEBUG=$BM_DEBUG" >> $BM_ENV_EXPORTS_PATH
 
     # Copy environment variables (without 'export') into environment file for services and PHP
@@ -494,7 +496,7 @@ _EOF_
     sudo adduser $BM_USER $BM_WEB_GROUP
 
     # Create folders where the group has write permissions
-    mkdir -p $BM_SERVER_ACTION_DIR $BM_MODE_LOCK_DIR $BM_LISTEN_COMM_DIR $BM_CONTROL_CAM_DIR
+    mkdir -p $BM_SERVER_ACTION_DIR $BM_MODE_LOCK_DIR $BM_LISTEN_COMM_DIR $BM_CONTROL_CAM_DIR $BM_RECORDINGS_DIR
 
     # Make sure mode lock file exists
     touch $BM_MODE_LOCK_FILE
@@ -522,6 +524,7 @@ _EOF_
     sudo chmod $BM_WRITE_PERMISSIONS $BM_PHPSYSINFO_CONFIG_FILE $(dirname $BM_PHPSYSINFO_CONFIG_FILE)
     sudo chmod $BM_WRITE_PERMISSIONS $BM_CONTROL_MIC_DIR
     sudo chmod $BM_WRITE_PERMISSIONS $BM_CONTROL_CAM_DIR
+    sudo chmod $BM_WRITE_PERMISSIONS $BM_RECORDINGS_DIR
 
     sudo mkdir -p $SERVER_LOG_DIR
     sudo touch $BM_SERVER_LOG_PATH

@@ -435,6 +435,8 @@ class Recorder:
             '--channels=1',
         ]
 
+        self.last_waveform = None
+
     def record_waveform(self, n_samples):
         with subprocess.Popen(self.arecord_args + [f'--samples={n_samples:d}'],
                               stdout=subprocess.PIPE,
@@ -443,6 +445,7 @@ class Recorder:
             waveform_bytes = process.stdout.read(
                 self.interpreter.compute_n_bytes(n_samples))
         waveform = self.interpreter(waveform_bytes)
+        self.last_waveform = waveform
         return waveform, record_time
 
     def amplify_waveform(self, waveform):
